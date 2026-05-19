@@ -5,16 +5,11 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { formatWaitTime, calcWaitMinutes } from '@/lib/queue'
 import type { QueueEntry, WashSettings } from '@/types'
-import { Users, Clock, RefreshCw } from 'lucide-react'
-
-interface QueueData {
-  entries: QueueEntry[]
-  settings: WashSettings | null
-}
 
 export default function QueuePage() {
   const router = useRouter()
-  const [data, setData] = useState<QueueData>({ entries: [], settings: null })
+  const [entries, setEntries] = useState<QueueEntry[]>([])
+  const [settings, setSettings] = useState<WashSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
   const [isOnline, setIsOnline] = useState(true)
@@ -22,9 +17,10 @@ export default function QueuePage() {
   const fetchQueue = useCallback(async () => {
     try {
       const res = await fetch('/api/queue')
-      if (!res.ok) throw new Error('fetch failed')
+      if (!res.ok) throw new Error()
       const json = await res.json()
-      setData({ entries: json.entries || [], settings: json.settings })
+      setEntries(json.entries || [])
+      setSettings(json.settings)
       setLastUpdated(new Date())
       setIsOnline(true)
     } catch {
@@ -35,149 +31,131 @@ export default function QueuePage() {
   }, [])
 
   useEffect(() => {
-    // Проверить есть ли сохранённый токен
     const token = localStorage.getItem('queue_session_token')
-    if (token) {
-      router.push(`/queue/my/${token}`)
-      return
-    }
+    if (token) { router.push(`/queue/my/${token}`); return }
     fetchQueue()
   }, [fetchQueue, router])
 
-  // Realtime подписка
   useEffect(() => {
     const supabase = createClient()
-    const channel = supabase
-      .channel('queue_changes')
+    const ch = supabase.channel('queue_live')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'queue_entries' }, fetchQueue)
       .subscribe()
-    return () => { supabase.removeChannel(channel) }
+    return () => { supabase.removeChannel(ch) }
   }, [fetchQueue])
 
-  const { entries, settings } = data
-  const activeEntries = entries.filter(e =>
-    ['waiting', 'notified', 'entering', 'washing'].includes(e.status)
+  const active = entries.filter(e => ['waiting','notified','entering','washing'].includes(e.status))
+
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen bg-surface">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-container" />
+    </div>
   )
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-      </div>
-    )
-  }
-
-  if (settings && !settings.is_open) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen px-4 text-center">
-        <div className="text-6xl mb-4">🚗</div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Мойка закрыта</h1>
-        <p className="text-gray-500">Приходите позже</p>
-      </div>
-    )
-  }
+  if (settings && !settings.is_open) return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-surface px-4 text-center">
+      <div className="text-6xl mb-4">🚗</div>
+      <h1 className="font-headline-lg text-headline-lg text-on-background mb-2">Мойка закрыта</h1>
+      <p className="font-small text-small text-on-surface-variant">Приходите позже</p>
+    </div>
+  )
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4 sticky top-0 z-10">
-        <p className="text-xs text-gray-400 text-center">{settings?.name}</p>
-        <h1 className="text-xl font-bold text-gray-900 text-center mt-0.5">
-          Очередь на мойку
-        </h1>
-        <div className="flex items-center justify-center gap-1.5 mt-1">
-          <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-red-400'}`} />
-          <span className="text-xs text-gray-400">
-            {isOnline
-              ? `Обновлено в ${lastUpdated.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })}`
-              : 'Нет соединения — данные могут быть устаревшими'}
-          </span>
+    <div className="bg-surface text-on-surface min-h-screen flex flex-col max-w-[390px] mx-auto overflow-x-hidden">
+      {/* Status bar sim */}
+      <div className="h-11 flex items-center justify-between px-6 bg-surface">
+        <span className="text-[15px] font-semibold">
+          {new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })}
+        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="material-symbols-outlined" style={{fontSize:18}}>signal_cellular_4_bar</span>
+          <span className="material-symbols-outlined" style={{fontSize:18}}>wifi</span>
+          <span className="material-symbols-outlined" style={{fontSize:18}}>battery_full</span>
         </div>
       </div>
 
-      <div className="px-4 py-4 space-y-3 pb-32">
-        {/* Summary */}
-        {activeEntries.length > 0 && (
-          <div className="flex gap-3">
-            <div className="flex-1 bg-white rounded-xl border border-gray-200 p-3 flex items-center gap-2">
-              <Users className="w-4 h-4 text-blue-600" />
-              <div>
-                <p className="text-xs text-gray-500">В очереди</p>
-                <p className="text-lg font-bold text-gray-900">{activeEntries.length}</p>
-              </div>
-            </div>
-            <div className="flex-1 bg-white rounded-xl border border-gray-200 p-3 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-500" />
-              <div>
-                <p className="text-xs text-gray-500">Ваше ожидание</p>
-                <p className="text-lg font-bold text-gray-900">
-                  {settings
-                    ? formatWaitTime(calcWaitMinutes(activeEntries.length + 1, settings))
-                    : '—'}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+      {/* Header */}
+      <header className="bg-surface px-container-margin py-4 text-center border-b border-outline-variant">
+        <div className="font-small text-small text-on-surface-variant mb-1">{settings?.name || 'АвтоМойка Про'}</div>
+        <h1 className="font-headline-lg text-headline-lg text-on-background">Очередь на мойку</h1>
+        <div className="flex items-center justify-center gap-2 mt-1">
+          <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-secondary pulse-dot' : 'bg-error'}`} />
+          <span className="font-small text-small text-on-surface-variant">
+            {isOnline ? 'Обновлено только что' : 'Нет соединения'}
+          </span>
+        </div>
+      </header>
 
-        {/* Queue cards */}
-        {activeEntries.length === 0 ? (
+      {/* Queue list */}
+      <main className="flex-1 px-container-margin py-stack-lg space-y-3 pb-40">
+        {active.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-              <span className="text-3xl">✨</span>
+            <div className="w-20 h-20 bg-primary-fixed rounded-full flex items-center justify-center mb-4">
+              <span className="material-symbols-outlined text-primary" style={{fontSize:40}}>local_car_wash</span>
             </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-1">Очередь пуста</h2>
-            <p className="text-gray-500 text-sm">Вы можете заехать прямо сейчас!</p>
+            <h2 className="font-headline-md text-headline-md text-on-background mb-1">Очередь пуста</h2>
+            <p className="font-small text-small text-on-surface-variant">Вы можете заехать прямо сейчас!</p>
           </div>
         ) : (
-          activeEntries.map((entry) => (
-            <QueueCard key={entry.id} entry={entry} settings={settings} />
-          ))
+          <>
+            {active.map((entry, i) => {
+              const isWashing = entry.status === 'washing'
+              const wait = settings ? formatWaitTime(calcWaitMinutes(entry.position, settings)) : ''
+              return (
+                <div key={entry.id}
+                  className={`bg-surface-container-lowest rounded-xl border border-outline-variant p-4 shadow-sm flex items-center gap-4 transition-transform active:scale-[0.98]
+                    ${isWashing ? 'border-l-4 border-l-primary-container shadow-lg' : ''}`}>
+                  <div className={`w-11 h-11 flex-shrink-0 rounded-full flex items-center justify-center
+                    ${isWashing ? 'bg-primary-fixed' : 'bg-surface-container-low'}`}>
+                    <span className="font-headline-md text-headline-md text-primary">{entry.position}</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-plate-number text-[16px] tracking-[2px] font-semibold text-on-surface leading-tight uppercase">
+                      {entry.plate_masked}
+                    </div>
+                    <div className="font-small text-small text-on-surface-variant">
+                      {isWashing ? 'Моется сейчас' : wait}
+                    </div>
+                  </div>
+                  <div className={`px-3 py-1 rounded-full text-[13px] font-semibold
+                    ${isWashing ? 'bg-[#DCFCE7] text-[#16A34A]' : 'bg-[#DBEAFE] text-[#2563EB]'}`}>
+                    {isWashing ? 'Моется' : 'Ожидает'}
+                  </div>
+                </div>
+              )
+            })}
+            <div className="text-center pt-2">
+              <p className="font-small text-small text-on-surface-variant">В очереди {active.length} автомобилей</p>
+            </div>
+          </>
         )}
-      </div>
+      </main>
 
       {/* Bottom CTA */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent pt-4 pb-8 px-4">
-        <button
-          onClick={() => router.push('/queue/join')}
-          className="w-full bg-blue-600 text-white font-bold text-base rounded-xl py-4 shadow-lg shadow-blue-200 active:bg-blue-700 transition-colors"
-        >
-          Встать в очередь →
-        </button>
+      <div className="fixed bottom-0 left-0 w-full max-w-[390px] mx-auto z-50">
+        <div className="bg-gradient-to-t from-surface via-surface/95 to-transparent pt-8 pb-4 px-container-margin">
+          <button
+            onClick={() => router.push('/queue/join')}
+            className="w-full h-[52px] bg-primary-container text-on-primary rounded-xl font-bold text-headline-md flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform">
+            Встать в очередь
+            <span className="material-symbols-outlined">arrow_forward</span>
+          </button>
+        </div>
+        <nav className="flex justify-around items-center px-4 pb-safe-area-bottom h-20 bg-surface border-t border-outline-variant">
+          <a href="#" className="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-4 py-1">
+            <span className="material-symbols-outlined" style={{'fontVariationSettings':"'FILL' 1"} as any}>format_list_numbered</span>
+            <span className="font-small text-small">Очередь</span>
+          </a>
+          <a href="#" className="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1">
+            <span className="material-symbols-outlined">calendar_today</span>
+            <span className="font-small text-small">Мои записи</span>
+          </a>
+          <a href="#" className="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1">
+            <span className="material-symbols-outlined">person</span>
+            <span className="font-small text-small">Профиль</span>
+          </a>
+        </nav>
       </div>
-    </main>
-  )
-}
-
-function QueueCard({ entry, settings }: { entry: QueueEntry; settings: WashSettings | null }) {
-  const isWashing = entry.status === 'washing'
-  const waitText = settings
-    ? formatWaitTime(calcWaitMinutes(entry.position, settings))
-    : ''
-
-  return (
-    <div className={`bg-white rounded-xl border p-4 flex items-center gap-3
-      ${isWashing ? 'border-l-4 border-l-blue-500 border-t-gray-200 border-r-gray-200 border-b-gray-200' : 'border-gray-200'}`}>
-      {/* Position circle */}
-      <div className="w-11 h-11 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-        <span className="text-xl font-bold text-blue-600">{entry.position}</span>
-      </div>
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-gray-900 tracking-wide">{entry.plate_masked}</p>
-        <p className="text-xs text-gray-500 mt-0.5">
-          {isWashing ? 'Моется сейчас' : waitText}
-        </p>
-      </div>
-
-      {/* Status badge */}
-      <span className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0
-        ${isWashing
-          ? 'bg-green-50 text-green-700'
-          : 'bg-blue-50 text-blue-700'}`}>
-        {isWashing ? 'Моется' : 'Ожидает'}
-      </span>
     </div>
   )
 }
