@@ -99,13 +99,32 @@ export default function QueuePage() {
         )}
       </main>
 
-      <div style={{position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:390,zIndex:50}}>
-        <div style={{background:'linear-gradient(to top,#f9f9ff 60%,transparent)',padding:'32px 16px 16px'}}>
-          <button onClick={() => router.push('/queue/join')} style={{width:'100%',height:52,background:'#2563eb',color:'#fff',fontWeight:700,fontSize:17,borderRadius:12,border:'none',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8,boxShadow:'0 4px 14px rgba(37,99,235,0.35)'}}>
-            Встать в очередь
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-          </button>
-        </div>
+<div style={{position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:390,zIndex:50}}>
+  <div style={{background:'linear-gradient(to top,#f9f9ff 60%,transparent)',padding:'32px 16px 16px'}}>
+    <button onClick={() => router.push('/queue/join')} style={{width:'100%',height:52,background:'#2563eb',color:'#fff',fontWeight:700,fontSize:17,borderRadius:12,border:'none',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8,boxShadow:'0 4px 14px rgba(37,99,235,0.35)'}}>
+      Встать в очередь
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+    </button>
+    <button onClick={() => router.push('/queue/join')} style={{width:'100%',marginTop:10,height:44,background:'transparent',color:'#434655',fontWeight:500,fontSize:14,borderRadius:12,border:'1px solid #c3c6d7',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:6}}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+      Уже в очереди? Найти мою запись
+    </button>
+  </div>
+  <nav style={{display:'flex',justifyContent:'space-around',alignItems:'center',padding:'8px 16px 34px',background:'#f9f9ff',borderTop:'1px solid #c3c6d7'}}>
+    <a href="#" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,textDecoration:'none',background:'#7cf994',color:'#007230',borderRadius:12,padding:'4px 16px'}}>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+      <span style={{fontSize:13}}>Очередь</span>
+    </a>
+    <a href="#" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,textDecoration:'none',color:'#434655'}}>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span style={{fontSize:13}}>Мои записи</span>
+    </a>
+    <a href="#" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,textDecoration:'none',color:'#434655'}}>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      <span style={{fontSize:13}}>Профиль</span>
+    </a>
+  </nav>
+</div>
         <nav style={{display:'flex',justifyContent:'space-around',alignItems:'center',padding:'8px 16px 34px',background:'#f9f9ff',borderTop:'1px solid #c3c6d7'}}>
           <a href="#" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,textDecoration:'none',background:'#7cf994',color:'#007230',borderRadius:12,padding:'4px 16px'}}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
