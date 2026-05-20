@@ -48,7 +48,7 @@ export default function JoinQueuePage() {
         <button onClick={() => router.back()} style={{width:40,height:40,display:'flex',alignItems:'center',justifyContent:'center',background:'none',border:'none',cursor:'pointer',color:'#111827',padding:0,flexShrink:0}}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
         </button>
-        <span style={{flex:1,textAlign:'center',fontSize:17,fontWeight:600,color:'#111827'}}>Встать в очередь</span>
+       <span style={{flex:1,textAlign:'center',fontSize:17,fontWeight:600,color:'#111827'}}>Встать в очередь / Найти запись</span>
         <div style={{width:40}}/>
       </header>
 
@@ -92,6 +92,9 @@ export default function JoinQueuePage() {
             }}
           />
           {error && <p style={{fontSize:13,color:'#ba1a1a',textAlign:'center',margin:0}}>{error}</p>}
+          <p style={{fontSize:12,color:'#6B7280',textAlign:'center',margin:0}}>
+  Введите номер чтобы встать в очередь или найти существующую запись
+</p>
         </div>
 
         <div style={{background:'#FFFBEB',borderLeft:'4px solid #F59E0B',borderRadius:12,padding:'12px 16px',display:'flex',gap:12,alignItems:'flex-start'}}>
