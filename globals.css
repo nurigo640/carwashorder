@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse-soft {
+  0% { opacity: .8; transform: scale(.95); }
+  50% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: .8; transform: scale(.95); }
+}
+@keyframes pulse-green {
+  0% { transform: scale(.95); box-shadow: 0 0 0 0 rgba(22,163,74,.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(22,163,74,0); }
+  100% { transform: scale(.95); box-shadow: 0 0 0 0 rgba(22,163,74,0); }
+}
+@keyframes stroke-draw {
+  from { stroke-dashoffset: 100; }
+  to   { stroke-dashoffset: 0;   }
+}
+@keyframes float {
+  0%   { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(-15px) rotate(15deg); }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.pulse-dot         { animation: pulse-soft  2s cubic-bezier(.4,0,.6,1) infinite; }
+.pulse-green       { animation: pulse-green 2s infinite; }
+.animate-stroke    { stroke-dasharray: 100; stroke-dashoffset: 100; animation: stroke-draw 1.2s cubic-bezier(.65,0,.45,1) forwards; }
+.confetti          { position: absolute; animation: float 3s ease-in-out infinite alternate; }
+.cursor-blink      { animation: blink 1s step-end infinite; }
