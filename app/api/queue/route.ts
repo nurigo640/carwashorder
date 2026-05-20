@@ -32,14 +32,14 @@ export async function POST(req: NextRequest) {
   const body: JoinQueueRequest = await req.json()
 
   // Валидация номера
-  if (!body.plate_number || !validatePlate(body.plate_number)) {
-    return NextResponse.json<ApiResponse<never>>(
-      { error: 'Неверный формат номера. Пример: А123ВС777' },
-      { status: 400 }
-    )
-  }
+if (!body.plate_number || body.plate_number.length < 2) {
+  return NextResponse.json<ApiResponse<never>>(
+    { error: 'Введите номер автомобиля' },
+    { status: 400 }
+  )
+}
 
-  const plate = normalizePlate(body.plate_number)
+const plate = body.plate_number.trim().toUpperCase()
 
   // Получить настройки
   const { data: settings } = await supabase
