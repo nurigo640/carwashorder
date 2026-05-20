@@ -77,8 +77,12 @@ export default function JoinQueuePage() {
           <input
             type="text"
             value={plate}
-            onChange={e => { setPlate(e.target.value.toUpperCase()); setError('') }}
-            placeholder="А 000 АА 000"
+           onChange={e => {
+  const val = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
+  setPlate(val)
+  setError('')
+}}
+            placeholder="000 AAA 00"
             maxLength={12}
             autoComplete="off"
             style={{
