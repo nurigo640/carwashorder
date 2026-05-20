@@ -9,12 +9,11 @@ export default function JoinQueuePage() {
   const [plate, setPlate] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [showCursor, setShowCursor] = useState(true)
 
   const handleSubmit = async () => {
     const normalized = normalizePlate(plate)
     if (!validatePlate(normalized)) {
-      setError('Неверный формат номера. Пример: А123ВС777')
+      setError('Неверный формат. Пример: А123ВС777')
       return
     }
     setError('')
@@ -35,93 +34,97 @@ export default function JoinQueuePage() {
         setError(json.error || 'Ошибка. Попробуйте ещё раз.')
         return
       }
-      const token = json.data.session_token
-      localStorage.setItem('queue_session_token', token)
-      router.push(`/queue/my/${token}`)
+      localStorage.setItem('queue_session_token', json.data.session_token)
+      router.push(`/queue/my/${json.data.session_token}`)
     } catch {
       setError('Нет соединения. Попробуйте ещё раз.')
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   }
 
   return (
-    <div className="bg-background text-on-surface min-h-screen flex flex-col overflow-x-hidden">
-      {/* TopAppBar */}
-      <header className="flex items-center px-container-margin h-14 w-full z-50 bg-surface border-b border-outline-variant sticky top-0">
-        <button onClick={() => router.back()} className="w-10 h-10 flex items-center justify-start text-[#111827] active:opacity-70 transition-opacity">
-          <span className="material-symbols-outlined">arrow_back</span>
+    <div style={{fontFamily:"'Inter',sans-serif",background:'#f9f9ff',color:'#141b2b',minHeight:'100vh',display:'flex',flexDirection:'column'}}>
+
+      {/* Header */}
+      <header style={{display:'flex',alignItems:'center',padding:'0 16px',height:56,background:'#f9f9ff',borderBottom:'1px solid #c3c6d7',position:'sticky',top:0,zIndex:50}}>
+        <button onClick={() => router.back()} style={{width:40,height:40,display:'flex',alignItems:'center',justifyContent:'center',background:'none',border:'none',cursor:'pointer',color:'#111827',padding:0,flexShrink:0}}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
         </button>
-        <h1 className="flex-grow text-center text-[17px] font-semibold text-[#111827]">Встать в очередь</h1>
-        <div className="w-10" />
+        <span style={{flex:1,textAlign:'center',fontSize:17,fontWeight:600,color:'#111827'}}>Встать в очередь</span>
+        <div style={{width:40}}/>
       </header>
 
-      <main className="flex-grow flex flex-col px-container-margin pt-stack-lg pb-stack-lg">
+      <main style={{flex:1,display:'flex',flexDirection:'column',padding:'24px 16px',gap:20}}>
+
         {/* Plate illustration */}
-        <div className="flex justify-center items-center h-20 mb-stack-md">
-          <div className="plate-container w-48 h-12 rounded-lg flex items-center justify-center overflow-hidden">
-            <div className="text-[#9CA3AF] font-plate-number tracking-[6px] text-lg">_ _ _ _ _ _</div>
-            <div className="plate-side-strip" />
+        <div style={{display:'flex',justifyContent:'center'}}>
+          <div style={{position:'relative',background:'#fff',border:'2px solid #2563eb',borderRadius:8,width:192,height:48,display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',boxShadow:'0 4px 6px -1px rgba(0,0,0,.1)'}}>
+            <span style={{fontFamily:"'JetBrains Mono',monospace",color:'#9CA3AF',letterSpacing:6,fontSize:16}}>_ _ _ _ _ _</span>
+            <div style={{position:'absolute',right:0,top:0,width:12,background:'#003ea8',height:'100%',borderTopRightRadius:4,borderBottomRightRadius:4}}/>
           </div>
         </div>
 
         {/* Heading */}
-        <div className="text-center mb-stack-lg">
-          <h2 className="font-headline-md text-[#111827] mb-2">Введите номер автомобиля</h2>
-          <p className="font-small text-[#6B7280] max-w-[280px] mx-auto">
+        <div style={{textAlign:'center'}}>
+          <h2 style={{fontSize:20,fontWeight:700,color:'#111827',margin:'0 0 8px'}}>Введите номер автомобиля</h2>
+          <p style={{fontSize:13,color:'#6B7280',maxWidth:280,margin:'0 auto',lineHeight:1.5}}>
             Мы добавим вас в очередь и сообщим, когда придёт ваша очередь
           </p>
         </div>
 
         {/* Input */}
-        <div className="space-y-stack-sm mb-stack-md">
-          <label className="font-small text-[#6B7280] ml-1">Гос. номер</label>
-          <div className="relative group">
-            <input
-              type="text"
-              value={plate}
-              onChange={e => {
-                setPlate(e.target.value.toUpperCase())
-                setError('')
-                setShowCursor(e.target.value.length === 0)
-              }}
-              placeholder="А 000 АА 000"
-              maxLength={12}
-              autoComplete="off"
-              autoCorrect="off"
-              className={`w-full h-14 bg-surface-container-lowest rounded-xl border text-center font-plate-number text-plate-number focus:ring-4 focus:ring-[#DBEAFE] focus:border-primary-container outline-none transition-all placeholder:text-[#9CA3AF]
-                ${error ? 'border-error' : 'border-primary-container'}`}
-            />
-            {showCursor && (
-              <div className="absolute inset-y-0 left-[34px] flex items-center pointer-events-none">
-                <span className="cursor-blink text-primary-container font-plate-number text-plate-number">|</span>
-              </div>
-            )}
-          </div>
-          {error && <p className="text-sm text-error text-center">{error}</p>}
+        <div style={{display:'flex',flexDirection:'column',gap:6}}>
+          <label style={{fontSize:13,color:'#6B7280',marginLeft:4}}>Гос. номер</label>
+          <input
+            type="text"
+            value={plate}
+            onChange={e => { setPlate(e.target.value.toUpperCase()); setError('') }}
+            placeholder="А 000 АА 000"
+            maxLength={12}
+            autoComplete="off"
+            style={{
+              width:'100%',height:56,borderRadius:12,
+              border: error ? '2px solid #ba1a1a' : '2px solid #2563eb',
+              textAlign:'center',
+              fontFamily:"'JetBrains Mono',monospace",
+              fontSize:24,fontWeight:700,letterSpacing:4,
+              outline:'none',background:'#fff',
+              boxSizing:'border-box',color:'#141b2b',
+            }}
+          />
+          {error && <p style={{fontSize:13,color:'#ba1a1a',textAlign:'center',margin:0}}>{error}</p>}
         </div>
 
-        {/* Warning banner */}
-        <div className="bg-[#FFFBEB] border-l-4 border-[#F59E0B] rounded-xl p-stack-md flex gap-3 items-start shadow-sm">
-          <span className="material-symbols-outlined text-[#F59E0B] text-[18px]" style={{'fontVariationSettings':"'FILL' 1"} as any}>warning</span>
-          <p className="font-small text-[#92400E] leading-tight">
-            Когда подойдёт ваша очередь, у вас будет <span className="font-bold">2 минуты</span> чтобы начать мойку — иначе место сбросится
+        {/* Warning */}
+        <div style={{background:'#FFFBEB',borderLeft:'4px solid #F59E0B',borderRadius:12,padding:'12px 16px',display:'flex',gap:12,alignItems:'flex-start'}}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#F59E0B" style={{flexShrink:0,marginTop:2}}><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+          <p style={{fontSize:13,color:'#92400E',lineHeight:1.5,margin:0}}>
+            Когда подойдёт ваша очередь, у вас будет <strong>2 минуты</strong> чтобы начать мойку — иначе место сбросится
           </p>
         </div>
+
       </main>
 
-      {/* Bottom */}
-      <footer className="sticky bottom-0 bg-background/80 backdrop-blur-md px-container-margin pb-safe-area-bottom pt-4 space-y-3">
+      {/* Footer */}
+      <footer style={{position:'sticky',bottom:0,background:'rgba(249,249,255,0.95)',backdropFilter:'blur(8px)',padding:'16px',paddingBottom:34,display:'flex',flexDirection:'column',gap:8,borderTop:'1px solid #e5e7eb'}}>
         <button
           onClick={handleSubmit}
           disabled={loading || plate.length < 6}
-          className="w-full h-[52px] bg-primary-container hover:bg-primary text-on-primary font-bold rounded-xl transition-all active:scale-[0.98] flex items-center justify-center shadow-lg shadow-primary-container/20 disabled:opacity-40">
+          style={{
+            width:'100%',height:52,
+            background: loading || plate.length < 6 ? '#93c5fd' : '#2563eb',
+            color:'#fff',fontWeight:700,fontSize:16,
+            borderRadius:12,border:'none',
+            cursor: loading || plate.length < 6 ? 'not-allowed' : 'pointer',
+            transition:'background .15s',
+          }}>
           {loading ? 'Добавляем...' : 'Подтвердить и встать в очередь'}
         </button>
-        <p className="text-center text-[12px] text-[#6B7280] font-small pb-2">
+        <p style={{fontSize:12,color:'#6B7280',textAlign:'center',margin:0}}>
           Вы всегда можете отказаться от очереди
         </p>
       </footer>
+
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@700&display=swap');`}</style>
     </div>
   )
 }
