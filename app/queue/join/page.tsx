@@ -45,7 +45,7 @@ const handleSubmit = async () => {
       const res = await fetch('/api/queue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plate_number: normalized }),
+        body: JSON.stringify({ plate_number: plate }),
       })
       const json = await res.json()
       if (!res.ok) {
