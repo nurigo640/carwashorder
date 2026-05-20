@@ -87,7 +87,7 @@ export default function QueuePage() {
                 <div key={entry.id} style={{background:'#fff',borderRadius:12,padding:16,display:'flex',alignItems:'center',gap:16,border:'1px solid #c3c6d7',borderLeft:isWashing?'4px solid #2563eb':'1px solid #c3c6d7',boxShadow:isWashing?'0 4px 12px rgba(0,0,0,0.08)':'0 1px 3px rgba(0,0,0,0.06)'}}>
                   <div style={{width:44,height:44,flexShrink:0,borderRadius:'50%',background:isWashing?'#dbe1ff':'#f1f3ff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,fontWeight:700,color:'#004ac6'}}>{entry.position}</div>
                   <div style={{flex:1}}>
-                    <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:16,fontWeight:700,letterSpacing:2,color:'#141b2b',textTransform:'uppercase'}}>{entry.plate_masked}</div>
+                    <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:16,fontWeight:700,letterSpacing:2,color:'#141b2b',textTransform:'uppercase'}}>{entry.plate_number}</div>
                     <div style={{fontSize:13,color:'#434655',marginTop:2}}>{isWashing?'Моется сейчас':wait}</div>
                   </div>
                   <div style={{padding:'4px 12px',borderRadius:999,fontSize:13,fontWeight:600,flexShrink:0,background:isWashing?'#dcfce7':'#dbeafe',color:isWashing?'#16a34a':'#2563eb'}}>{isWashing?'Моется':'Ожидает'}</div>
