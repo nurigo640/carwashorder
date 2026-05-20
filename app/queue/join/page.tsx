@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { validatePlate, normalizePlate } from '@/lib/queue'
+import { } from '@/lib/queue'
 
 export default function JoinQueuePage() {
   const router = useRouter()
@@ -10,12 +10,35 @@ export default function JoinQueuePage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async () => {
-    const normalized = normalizePlate(plate)
-    if (!validatePlate(normalized)) {
-      setError('Неверный формат. Пример: А123ВС777')
+const handleSubmit = async () => {
+  if (plate.length < 4) {
+    setError('Введите номер автомобиля')
+    return
+  }
+  setError('')
+  setLoading(true)
+  try {
+    const res = await fetch('/api/queue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plate_number: plate }),
+    })
+    const json = await res.json()
+    if (!res.ok) {
+      if (res.status === 409 && json.data?.session_token) {
+        localStorage.setItem('queue_session_token', json.data.session_token)
+        router.push(`/queue/my/${json.data.session_token}`)
+        return
+      }
+      setError(json.error || 'Ошибка. Попробуйте ещё раз.')
       return
     }
+    localStorage.setItem('queue_session_token', json.data.session_token)
+    router.push(`/queue/my/${json.data.session_token}`)
+  } catch {
+    setError('Нет соединения. Попробуйте ещё раз.')
+  } finally { setLoading(false) }
+}
     setError('')
     setLoading(true)
     try {
