@@ -10,7 +10,7 @@ export async function GET() {
   const [{ data: entries }, { data: settings }, { data: posts }] = await Promise.all([
     supabase
       .from('queue_entries')
-      .select('id, plate_masked, position, status, created_at, post_number, wash_started_at')
+      .select('id, plate_number, plate_masked, position, status, created_at, post_number, wash_started_at')
       .in('status', ['waiting', 'notified', 'entering', 'washing'])
       .order('position', { ascending: true }),
     supabase
