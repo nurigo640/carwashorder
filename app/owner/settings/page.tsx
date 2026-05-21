@@ -123,26 +123,6 @@ export default function OwnerSettingsPage() {
           />
         </div>
 
-        {/* Посты */}
-        <div style={{background:'#fff',borderRadius:16,padding:'16px 20px'}}>
-          <div style={{fontSize:13,fontWeight:600,color:'#6B7280',textTransform:'uppercase',letterSpacing:'0.05em',marginBottom:12}}>Активных постов</div>
-          <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:20}}>
-            <button onClick={() => setSettings(s => s ? {...s, active_posts: Math.max(1, s.active_posts - 1)} : s)}
-              style={{width:48,height:48,borderRadius:'50%',border:'1px solid #E5E7EB',background:'#F9FAFB',fontSize:24,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',color:'#374151'}}>−</button>
-            <div style={{textAlign:'center'}}>
-              <div style={{fontSize:36,fontWeight:700,color:'#111827',lineHeight:1}}>{settings.active_posts}</div>
-              <div style={{fontSize:12,color:'#6B7280',marginTop:4}}>из 10 максимум</div>
-            </div>
-            <button onClick={() => setSettings(s => s ? {...s, active_posts: Math.min(10, s.active_posts + 1)} : s)}
-              style={{width:48,height:48,borderRadius:'50%',border:'none',background:'#2563EB',fontSize:24,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',color:'#fff'}}>+</button>
-          </div>
-          <div style={{display:'flex',justifyContent:'center',gap:6,marginTop:12}}>
-            {Array.from({length:10},(_,i) => (
-              <div key={i} style={{width:20,height:20,borderRadius:'50%',background:i < settings.active_posts ? '#2563EB' : '#E5E7EB',transition:'background .2s'}}/>
-            ))}
-          </div>
-        </div>
-
         {/* Таймер мойки */}
         <div style={{background:'#fff',borderRadius:16,padding:'16px 20px'}}>
           <div style={{fontSize:13,fontWeight:600,color:'#6B7280',textTransform:'uppercase',letterSpacing:'0.05em',marginBottom:12}}>Среднее время мойки</div>
