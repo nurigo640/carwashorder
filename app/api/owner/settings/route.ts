@@ -46,8 +46,7 @@ export async function PUT(req: NextRequest) {
     .update(updates)
     .eq('id', owner.wash_id)
     .select()
-    .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ data })
+  return NextResponse.json({ data: data?.[0] })
 }
